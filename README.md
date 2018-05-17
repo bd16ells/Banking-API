@@ -1,5 +1,6 @@
 # Banking-API
-RESTful API Spring Boot Banking application 
+RESTful API Spring Boot Banking application   
+
 Created to meet the followng requirements:  
 * You need to persist the data  
 * You should use Spring Security  
