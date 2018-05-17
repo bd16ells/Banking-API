@@ -1,0 +1,36 @@
+body{
+	background-color: #777;
+}
+
+.vertical-offset-100{
+    padding-top:100px;
+}
+
+.page-header.custom{
+
+	box-shadow: 3px 3px #ee5544 , -1em 0 .4em#1199aa;
+}
+
+table {
+margin-left: auto;
+margin-right: auto;
+}
+
+.page-header.white{
+color:white;
+}
+.copy{
+color:white;
+}
+
+.transferDropdown{
+cursor: pointer;
+}
+
+#errorHandling{
+color:red;
+}
+
+thead td {
+text-decoration: underline;
+}

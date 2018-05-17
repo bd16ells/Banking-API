@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>JG Bank</title>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+</head>
+<body>
+<div class="container">
+    <!--<div class="row justify-content-center">-->
+            <div class="page-header white">
+                <h1>JG Bank<small> by Jahnel Group</small></h1>
+            </div>
+            <h3><br>Login</h3>
+            <div class="col-6">
+                <div th:if="${loginError}" class="alert alert-danger" role="alert">
+                        Incorrect username or password
+                </div>
+            <form action="/login" method="POST" accept-charset="UTF-8" role="form">
+
+                <fieldset>
+
+                    <div class="form-group">
+                        <input class="form-control" placeholder="Username" name="username" type="text">
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control" placeholder="Password" name="password" type="password">
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input name="remember" type="checkbox" value="Remember Me"> Remember Me
+                        </label>
+                    </div>
+                    <input class="btn btn-lg btn-success btn-block" type="submit" value="Login">
+            </form>
+        </div>
+</div>
+    <!--</div>-->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
