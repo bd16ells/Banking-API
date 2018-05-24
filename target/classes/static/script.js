@@ -12,31 +12,145 @@ errorDiv.style.display = "none";
 errorHeading.innerHTML = "Error";
 error.innerHTML = "You have requested to transfer more funds than you currently have. Please try again.";
 
+var welcome = document.getElementById("welcomeMessage");
+
+function addUsername(){
+    welcome.innerHTML = "Welcome, " + (this.response);
+}
+
+var xhr = new XMLHttpRequest();
+xhr.open("GET", "/username");
+xhr.addEventListener("load", addUsername);
+xhr.send();
+
+
 
 $("a.tooltipLink").tooltip();
 function addBalances(){
     errorDiv.style.display = "none";
     var data = this.response;
-    checkingAmount.value = "";
-    savingsAmount.value = "";
-    // handle errors here
+
+    var inputs = document.getElementsByClassName("inputArea");
+    for(var i = 0; i < inputs.length; i++){
+        inputs.item(i).innerHTML = "";
+    }
+
     if(data != null && this.status > 300){
        // console.log(this.status);
         errorDiv.style.display = "block";
-
-
-
         return;
     }
     errorHeading.innerHTML = "";
-   // console.log(data);
     var dataArray = JSON.parse(data);
 
-    checking.textContent = '$' + formatNumber(dataArray['checkingBalance']);
-    savings.innerHTML = '$' + formatNumber(dataArray['savingsBalance']);
-    var sum =  parseFloat(dataArray['checkingBalance']) +
-                  parseFloat(dataArray['savingsBalance']);
-    available.innerHTML = "$" + formatNumber(sum);
+    var table = document.getElementById("mainTable");
+
+     while(table.firstChild){
+         table.removeChild(table.firstChild);
+     }
+
+    var totalSum = 0;
+
+    for(var i = 0; i < dataArray.length; i++){
+        var td1 = document.createElement("td");
+        var td2 = document.createElement("td");
+        var td3 = document.createElement("td");
+        var td4 = document.createElement("td");
+        var td5 = document.createElement("td");
+        var str = dataArray[i]['type'];
+        str = str.charAt(0) + str.slice(1).toLowerCase();
+
+        td1.innerHTML = str;
+        td2.innerHTML = dataArray[i]['name'].replace(/_/g, " ");
+        td3.innerHTML = '$' + formatNumber(dataArray[i]['balance']);
+        totalSum += dataArray[i]['balance'];
+
+        var btnDeposit = document.createElement("button");
+        btnDeposit.setAttribute("type", "button");
+        btnDeposit.setAttribute("class", "btn btn-outline-primary btn-sm");
+        btnDeposit.innerHTML = "Deposit";
+        btnDeposit.setAttribute("id", "account"+ dataArray[i]['id']);
+
+
+        var btnWithdraw = document.createElement("button");
+        btnWithdraw.setAttribute("type", "button");
+        btnWithdraw.setAttribute("class", "btn btn-outline-warning btn-sm");
+        btnWithdraw.innerHTML = "Withdraw";
+        btnWithdraw.setAttribute("id", "account"+ dataArray[i]['id']);
+
+
+        var btnTransfer = document.createElement("button");
+        btnTransfer.setAttribute("type", "button");
+        btnTransfer.setAttribute("class", "btn btn-outline-success btn-sm dropdown-toggle");
+        btnTransfer.setAttribute("data-toggle","dropdown");
+        btnTransfer.setAttribute("aria-haspopup","true");
+        btnTransfer.setAttribute("aria-expanded","false");
+        btnTransfer.innerHTML = "Transfer into";
+        btnTransfer.setAttribute("id", "transferFrom"+dataArray[i]['id']);
+
+        var ul = document.createElement("ul");
+        ul.setAttribute("class", "dropdown-menu");
+
+        for(var k = 0; k < dataArray.length; k++){
+        if(i !== k){
+            var li = document.createElement("li");
+            var a = document.createElement("a");
+            a.setAttribute("class", "transferDropdown");
+            a.innerHTML = dataArray[k]['name'].replace(/_/g, " ");
+            a.onclick = function(a) {transfer(a)};
+            li.appendChild(a);
+            ul.appendChild(li);
+            }
+        }
+
+
+
+        var sp = document.createElement("span");
+        sp.setAttribute("class", "caret");
+        btnTransfer.appendChild(sp);
+
+        td4.appendChild(btnDeposit);
+        td4.appendChild(btnWithdraw);
+        td4.appendChild(btnTransfer);
+        td4.appendChild(ul);
+
+
+        var inputArea = document.createElement("input");
+        inputArea.setAttribute("type", "text");
+        inputArea.setAttribute("class", "form-control inputArea");
+        inputArea.setAttribute("placeholder", "Enter amount...");
+
+        td5.appendChild(inputArea);
+        var trow = document.createElement("tr");
+        trow.appendChild(td1);
+        trow.appendChild(td2);
+        trow.appendChild(td3);
+        trow.appendChild(td4);
+        trow.appendChild(td5);
+        table.appendChild(trow);
+
+
+
+    btnWithdraw.onclick = function(btnWithdraw){withdraw(btnWithdraw)};
+    btnDeposit.onclick = function(btnDeposit){deposit(btnDeposit)};
+
+    }
+
+    var trow = document.createElement("tr");
+    var td1 = document.createElement("td");
+    var td2 = document.createElement("td");
+    var td3 = document.createElement("td");
+
+
+    td1.innerHTML = "All";
+    td2.innerHTML = "Available Balance";
+    td3.innerHTML = '$' + formatNumber(totalSum);
+
+    trow.appendChild(td1);
+    trow.appendChild(td2);
+    trow.appendChild(td3);
+    table.appendChild(trow);
+
 
     history();
 
@@ -51,117 +165,89 @@ var xhr = new XMLHttpRequest();
     xhr.send();
 
 
-function depositSavings(){
+
+function getAccount(number){
     var xhr = new XMLHttpRequest();
-        xhr.open("POST", "api/savings/deposit");
+    var URI = "api/accounts/" + number;
+
+
+    xhr.open("GET", URI, false);
+    xhr.send();
+    return xhr.response;
+}
+
+function transfer(element){
+var xhr = new XMLHttpRequest();
+var actName = element.srcElement.innerHTML.replace(/ /g, "_");
+    var amount = element.srcElement.parentElement.parentElement.parentElement.nextSibling.childNodes[0].value;
+
+        xhr.open("POST", "api/transfer/" + actName + "/" + amount);
+        /*Preparing request body */
+        xhr.addEventListener("load", addBalances);
+
+
+        var data = getAccount(element.srcElement.parentElement.parentElement.previousSibling.id
+        .charAt(element.srcElement.parentElement.parentElement.previousSibling.id.length-1)); //lol
+
+
+
+    if (amount === null || isNaN(amount) || amount =="") {
+         alert("Please enter a valid amount to transfer.")
+                return; //break out of the function early
+            }
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+
+            xhr.send(data);
+
+}
+
+
+
+function deposit(element){
+    var data = getAccount(element.srcElement.id.charAt(element.srcElement.id.length-1));
+
+    var amount = element.srcElement.parentElement.nextSibling.childNodes[0].value;
+    var xhr = new XMLHttpRequest();
+    var URI = "api/deposit/"+ amount;
+        xhr.open("POST", URI);
         /*Preparing request body */
         xhr.addEventListener("load", addBalances)
 
-        var amount = savingsAmount.value;
+
         if (amount === null || isNaN(amount) || amount =="") {
                 alert("Please enter a valid amount to deposit.")
                 return; //break out of the function early
 
             }
 
-        var data = {};
-        data['amount'] = amount;
         xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-
-        xhr.send(JSON.stringify(data));
+        xhr.send(data);
 }
-function depositChecking(){
+
+function withdraw(element){
+    var data = getAccount(element.srcElement.id.charAt(element.srcElement.id.length-1));
+
+    var amount = element.srcElement.parentElement.nextSibling.childNodes[0].value;
     var xhr = new XMLHttpRequest();
-        xhr.open("POST", "api/checking/deposit");
+    var URI = "api/withdraw/"+ amount;
+        xhr.open("POST", URI);
         /*Preparing request body */
         xhr.addEventListener("load", addBalances)
 
-        var amount = checkingAmount.value;
-         if (amount === null || isNaN(amount) || amount =="") {
-         alert("Please enter a valid amount to deposit.")
-                return; //break out of the function early
-            }
-        var data = {};
-        data['amount'] = amount;
-        xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 
-        xhr.send(JSON.stringify(data));
-}
-function withdrawChecking(){
-    var xhr = new XMLHttpRequest();
-        xhr.open("POST", "api/checking/withdraw");
-        /*Preparing request body */
-        xhr.addEventListener("load", addBalances)
 
-        var amount = checkingAmount.value;
-         if (amount === null || isNaN(amount) || amount =="") {
-         alert("Please enter a valid amount to withdraw.")
-                return; //break out of the function early
-            }
-        var data = {};
-        data['amount'] = amount;
-        xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-
-        xhr.send(JSON.stringify(data));
-
-}
-function withdrawSavings(){
-    var xhr = new XMLHttpRequest();
-        xhr.open("POST", "api/savings/withdraw");
-        /*Preparing request body */
-        xhr.addEventListener("load", addBalances)
-
-        var amount = savingsAmount.value;
         if (amount === null || isNaN(amount) || amount =="") {
-         alert("Please enter a valid amount to withdraw.")
+                alert("Please enter a valid amount to withdraw.")
                 return; //break out of the function early
-            }
-        var data = {};
-        data['amount'] = amount;
-        xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 
-        xhr.send(JSON.stringify(data));
-}
-function transferIntoSavings(){
-var xhr = new XMLHttpRequest();
-        xhr.open("POST", "api/transfer");
-        /*Preparing request body */
-        xhr.addEventListener("load", addBalances)
-
-        var amount = checkingAmount.value;
-        if (amount === null || isNaN(amount) || amount =="") {
-         alert("Please enter a valid amount to transfer.")
-                return; //break out of the function early
-            }
-        var data = {};
-        data['amount'] = amount;
-        data['to'] = "savings";
-        data['from'] = "checking"
-        xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-
-        xhr.send(JSON.stringify(data));
-}
-
-function transferIntoChecking(){
-var xhr = new XMLHttpRequest();
-        xhr.open("POST", "api/transfer");
-        /*Preparing request body */
-        xhr.addEventListener("load", addBalances)
-
-        var amount = savingsAmount.value;
-        if (amount === null || isNaN(amount) || amount =="") {
-         alert("Please enter a valid amount to transfer.")
-                return; //break out of the function early
             }
 
-        var data = {};
-        data['amount'] = amount;
-        data['from'] = "savings";
-        data['to'] = "checking"
-        xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 
-        xhr.send(JSON.stringify(data));
+        xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+        xhr.send(data);
 }
+
+
 $(function () {
   $('[data-toggle="popover"]').popover()
 });
@@ -194,11 +280,11 @@ function addHistory(){
         var td3 = document.createElement("td");
         var td4 = document.createElement("td");
         var td5 = document.createElement("td");
-        td1.innerHTML = "Into";
-        td2.innerHTML = "From";
-        td3.innerHTML = "Amount";
-        td4.innerHTML = "Date";
-        td5.innerHTML = "New Balance";
+        td1.innerHTML = "Account";
+        td2.innerHTML = "Transaction";
+        td3.innerHTML = "Starting Balance";
+        td4.innerHTML = "Ending Balance";
+        td5.innerHTML = "Date";
         var trow = document.createElement("tr");
         trow.appendChild(td1);
         trow.appendChild(td2);
@@ -211,8 +297,6 @@ function addHistory(){
 
     for(var i = 0; i < dataArray.length; i++){
 
-
-
         var trow = document.createElement("tr");
         var td1 = document.createElement("td");
         var td2 = document.createElement("td");
@@ -221,15 +305,13 @@ function addHistory(){
         var td5 = document.createElement("td");
 
 
-        td1.innerHTML = dataArray[i]['accountTo'];
-        td2.innerHTML = dataArray[i]['accountFrom'];
-        td3.innerHTML = '$' + formatNumber(dataArray[i]['amount']);
+        td1.innerHTML = dataArray[i]['accountName'].replace(/_/g, " ");
+        td2.innerHTML = dataArray[i]['type'];//.replace(/_/g, " ");
+        td3.innerHTML = '$' + formatNumber(dataArray[i]['balanceBefore']);
 
-        //console.log(moment(dataArray[i]['createdDatetime']));
-
-        td4.innerHTML = moment(dataArray[i]['createdDatetime']).format('MMMM Do YYYY, h:mm:ss a');
-        //td4.innerHTML = new Date(dataArray[i]['createdDatetime']);
-        td5.innerHTML = '$' + formatNumber(dataArray[i]['balance']);
+        td4.innerHTML = '$' + formatNumber(dataArray[i]['balanceAfter']);
+        td5.innerHTML = moment(dataArray[i]['createdDatetime']).format('MMMM Do YYYY, h:mm:ss a');
+        //td5.innerHTML = '$' + formatNumber(dataArray[i]['balance']);
 
         trow.appendChild(td1);
         trow.appendChild(td2);
@@ -256,5 +338,4 @@ function toggleHistory(){
         table.style.display = "none";
     }
 }
-
 
