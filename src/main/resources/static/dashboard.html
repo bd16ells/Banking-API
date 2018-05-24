@@ -19,75 +19,26 @@
 <div class="container">
     <div class="page-header white">
         <h1>JG Bank<small> by Jahnel Group</small></h1>
+        <p id="welcomeMessage"></p>
     </div>
     <div class="alert alert-danger" id="errorDiv" role="alert" style="display:none">
         <h4 class="alert-heading" id="errorHeading"></h4>
         <p id="errorMessage"></p>
     </div>
-    <table class="table table-striped table-dark">
+    <table class="table table-striped table-dark" >
+
         <thead>
         <tr>
-        <td>Account</td>
+            <td>Account Type</td>
+            <td>Account Name</td>
             <td>Balance</td>
             <td>Transaction</td>
             <td>Amount</td>
         </tr>
         </thead>
-        <tr>
-            <td>
-                Checking
-            </td>
-            <td id="checking">
 
-            </td>
-            <td>
-                <button onclick='return depositChecking()' type="button" class="btn btn-outline-primary btn-sm">Deposit</button>
-                <button onclick='return withdrawChecking()' type="button" class="btn btn-outline-warning btn-sm">Withdraw</button>
-                <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Transfer <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a onclick="return transferIntoSavings()" class="transferDropdown"> Transfer into Savings </a></li>
-                </ul>
-            </td>
-            <td>
-                <input type="text" class="form-control" id="checkingAmount" placeholder="Enter amount..">
-            </td>
+            <tbody id="mainTable"></tbody>
 
-        </tr>
-        <tr>
-            <td>
-                Savings
-            </td>
-            <td id="savings">
-
-            </td>
-            <td>
-                <button onclick='return depositSavings()'  type="button" class="btn btn-outline-primary btn-sm">Deposit</button>
-                <button onclick='return withdrawSavings()' type="button" class="btn btn-outline-warning btn-sm">Withdraw</button>
-                <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Transfer <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a onclick="return transferIntoChecking()" class="transferDropdown"> Transfer into Checking </a></li>
-                </ul>
-            </td>
-            <td>
-                <input type="text" class="form-control" id="savingsAmount" placeholder="Enter amount..">
-            </td>
-        </tr>
-        <tr>
-            <td>Available funds</td>
-            <td id="available">
-
-            </td>
-            <td>
-
-            <td>
-                 <button type="button" class="float-right btn btn-sm btn-outline-light" data-toggle="popover" title="Information" data-content="To make a transaction, enter the amount you would like to transfer in the box above. Then click on the corresponding transaction type to complete it.">Help</button>            </td>
-
-            </td>
-        </tr>
     </table>
     <div>
         <p>
